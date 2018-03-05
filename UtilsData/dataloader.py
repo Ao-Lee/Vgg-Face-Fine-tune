@@ -57,23 +57,6 @@ class DataLoaderIter(object):
         self.send_idx += 1
 
 class DataLoader(object):
-    """
-    Data loader. Combines a dataset and a sampler, and provides
-    single- or multi-process iterators over the dataset.
-
-    Arguments:
-        dataset (Dataset): dataset from which to load the data.
-        batch_size (int, optional): how many samples per batch to load
-            (default: 1).
-        shuffle (bool, optional): set to ``True`` to have the data reshuffled
-            at every epoch (default: False).
-        collate_fn (callable, optional): merges a list of samples to form a mini-batch.
-        drop_last (bool, optional): set to ``True`` to drop the last incomplete batch,
-            if the dataset size is not divisible by the batch size. If ``False`` and
-            the size of dataset is not divisible by the batch size, then the last batch
-            will be smaller. (default: False)
-    """
-
     def __init__(self, dataset, batch_size=1, shuffle=False,
                  collate_fn=default_collate, drop_last=False):
         self.dataset = dataset

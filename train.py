@@ -26,6 +26,7 @@ def triplet_loss(inputs, dist='sqeuclidean', margin='maxplus'):
         loss = K.log(1 + K.exp(loss))
     return K.mean(loss)
 
+    
 def triplet_loss_np(inputs, dist='sqeuclidean', margin='maxplus'):
     anchor, positive, negative = inputs
     positive_distance = np.square(anchor - positive)
@@ -60,6 +61,7 @@ def check_loss():
     print(np.linalg.norm(out1))
     print(np.linalg.norm(out2))
     print(np.linalg.norm(out1-out2))
+
     
 def GetModel():
     base_model = VggFace(weights='face', include_top=False)
@@ -96,7 +98,7 @@ if __name__=='__main__':
     triplet_model.compile(loss=None, optimizer=Adam(0.001))
     
     history = triplet_model.fit_generator(gen_tr, 
-                              validation_data=gen_te, 
+                              validation_data=gen_te,  
                               epochs=2, 
                               verbose=1, 
                               workers=4,

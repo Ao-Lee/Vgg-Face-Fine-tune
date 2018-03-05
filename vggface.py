@@ -80,5 +80,4 @@ def preprocess_input(batch_image):
     batch_image = batch_image.astype(np.float32)
     batch_image = batch_image.transpose([0,3,1,2])
     return batch_image
-        
     

@@ -1,13 +1,6 @@
 import numpy as np
 
 class Sampler(object):
-    """Base class for all Samplers.
-
-    Every Sampler subclass has to provide an __iter__ method, providing a way
-    to iterate over indices of dataset elements, and a __len__ method that
-    returns the length of the returned iterators.
-    """
-
     def __init__(self, data_source):
         pass
 
@@ -19,11 +12,6 @@ class Sampler(object):
 
 
 class SequentialSampler(Sampler):
-    """Samples elements sequentially, always in the same order.
-
-    Arguments:
-        data_source (Dataset): dataset to sample from
-    """
 
     def __init__(self, data_source):
         self.data_source = data_source
@@ -36,11 +24,6 @@ class SequentialSampler(Sampler):
 
 
 class RandomSampler(Sampler):
-    """Samples elements randomly, without replacement.
-
-    Arguments:
-        data_source (Dataset): dataset to sample from
-    """
 
     def __init__(self, data_source):
         self.data_source = data_source

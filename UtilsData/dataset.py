@@ -1,13 +1,6 @@
 import bisect
 
 class Dataset(object):
-    """An abstract class representing a Dataset.
-
-    All other datasets should subclass it. All subclasses should override
-    ``__len__``, that provides the size of the dataset, and ``__getitem__``,
-    supporting integer indexing in range from 0 to len(self) exclusive.
-    """
-
     def __getitem__(self, index):
         raise NotImplementedError
 
@@ -19,16 +12,7 @@ class Dataset(object):
 
 
 class ConcatDataset(Dataset):
-    """
-    Dataset to concatenate multiple datasets.
-    Purpose: useful to assemble different existing datasets, possibly
-    large-scale datasets as the concatenation operation is done in an
-    on-the-fly manner.
-
-    Arguments:
-        datasets (iterable): List of datasets to be concatenated
-    """
-
+    
     @staticmethod
     def cumsum(sequence):
         r, s = [], 0
