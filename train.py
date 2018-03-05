@@ -2,7 +2,7 @@ import numpy as np
 from keras import backend as K
 from keras.models import Model
 from keras.optimizers import Adam
-from keras.layers import Input, Lambda
+from keras.layers import Input
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from sklearn.preprocessing import normalize
 from vggface import VggFace
@@ -64,11 +64,7 @@ def check_loss():
 
     
 def GetModel():
-    base_model = VggFace(weights='face', include_top=False)
-    x = base_model.output
-    x = Lambda(lambda  x: K.l2_normalize(x,axis=1))(x)
-    embedding_model = Model(base_model.input, x, name="embedding")
-
+    embedding_model = VggFace()
     input_shape = (3, cfg.image_size, cfg.image_size)
     anchor_input = Input(input_shape, name='anchor_input')
     positive_input = Input(input_shape, name='positive_input')
@@ -99,10 +95,29 @@ if __name__=='__main__':
     
     history = triplet_model.fit_generator(gen_tr, 
                               validation_data=gen_te,  
+                              epochs=3, 
+                              verbose=1, 
+                              workers=4,
+                              steps_per_epoch=50, 
+                              validation_steps=20)
+    
+    
+    
+    for layer in embedding_model.layers[30:]:
+        layer.trainable = True
+    for layer in embedding_model.layers[:30]:
+        layer.trainable = False
+        
+    triplet_model.compile(loss=None, optimizer=Adam(0.000003))
+    
+    history = triplet_model.fit_generator(gen_tr, 
+                              validation_data=gen_te,  
                               epochs=2, 
                               verbose=1, 
                               workers=4,
                               steps_per_epoch=50, 
                               validation_steps=20)
+    
+    embedding_model.save_weights(cfg.dir_model_tuned)
     
     

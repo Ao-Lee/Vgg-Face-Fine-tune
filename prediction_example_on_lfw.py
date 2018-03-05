@@ -46,7 +46,9 @@ def GetBestThreshold(distance, label):
 
 if __name__ == "__main__":
     dl = GetLoader()
-    model = VggFace(weights='face', include_top=False)
+    # model = VggFace()
+    model = VggFace(path=None)
+    model.load_weights(cfg.dir_model_tuned)
     
     distances = []
     labels = []
@@ -67,7 +69,7 @@ if __name__ == "__main__":
     prediction = (distances < threshold).astype(np.int)
     acc = metrics.accuracy_score(labels, prediction)
     print('auc is: {}'.format(auc))
-    print('threshold is {}'.format(threshold))
+    print('threshold is {}'.format(threshold)) # 0.409
     print('accuracy is {}'.format(acc))
     
     

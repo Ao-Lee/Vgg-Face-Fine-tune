@@ -1,10 +1,11 @@
 from keras.models import Model
-from keras.layers import Activation, Input, Conv2D, ZeroPadding2D, MaxPooling2D, Flatten, Dense, Dropout
+from keras.layers import Lambda, Activation, Input, Conv2D, ZeroPadding2D, MaxPooling2D, Flatten, Dense, Dropout
 import numpy as np
+from keras import backend as K
 import cfg
 assert cfg.image_size==224
 
-def VggFace(weights='face', include_top=False):
+def VggFace(path=cfg.dir_model, include_top=False):
     img = Input(shape=(3, 224, 224))
 
     pad1_1 = ZeroPadding2D(padding=(1, 1))(img)
@@ -55,13 +56,14 @@ def VggFace(weights='face', include_top=False):
 
     model = Model(inputs=img, outputs=out)
 
-    if weights=='face':
-        model.load_weights(cfg.dir_model)
+    if path is not None:
+        model.load_weights(path)
 
     if include_top==True:
         return model
     else:
-        topless = Model(inputs=model.input, outputs=fc7)
+        norm = Lambda(lambda x: K.l2_normalize(x, axis=1))(fc7)
+        topless = Model(inputs=model.input, outputs=norm)
         return topless
         
 def preprocess_input(batch_image):
