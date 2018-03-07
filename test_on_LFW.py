@@ -1,10 +1,11 @@
 import numpy as np
 from scipy.spatial.distance import cosine
-from data import LFWSet, DataLoader
 from sklearn.preprocessing import normalize
 from sklearn import metrics
 from tqdm import tqdm
+
 from vggface import VggFace, preprocess_input
+from data import LFWSet, DataLoader
 import cfg
 
 def GetLoader():
@@ -46,9 +47,9 @@ def GetBestThreshold(distance, label):
 
 if __name__ == "__main__":
     dl = GetLoader()
-    # model = VggFace()
-    model = VggFace(path=None)
-    model.load_weights(cfg.dir_model_tuned)
+    model = VggFace()
+    # model = VggFace(path=None)
+    # model.load_weights(cfg.dir_model_tuned)
     
     distances = []
     labels = []

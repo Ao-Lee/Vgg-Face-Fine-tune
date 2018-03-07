@@ -7,7 +7,7 @@ def _AlignFolder(folder_source, folder_target, align_func):
     for item in os.listdir(folder_source):
         input_path = os.path.join(folder_source, item)
         cond1 = os.path.isfile(input_path)
-        cond2 = input_path.find('.jpeg') != (-1) or input_path.find('.jpg') != (-1)
+        cond2 = input_path.find('.jpeg') != (-1) or input_path.find('.jpg') != (-1) or input_path.find('.bmp') != (-1)
         if not cond1 or not cond2:
             continue
         img = align_func(input_path)
@@ -45,6 +45,7 @@ def AlignDatabase(source, target, align_func):
         folder_source = os.path.join(source, item)
         folder_target = os.path.join(target, item)
         if not os.path.isdir(folder_source):
+            print(folder_source)
             continue
         unable = _AlignFolder(folder_source, folder_target, align_func)
         unables = unables + unable
