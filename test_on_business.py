@@ -47,13 +47,13 @@ def GetPCDDataFrame(dir_parant):
     df['path1'] = pd.Series(list_path0)
     df['path2'] = pd.Series(list_path1)
     return df
-    
+
 def Path2Image(path):
     im = Image.open(path)
     im = im.resize((224,224))
     im = np.array(im).astype(np.float32)
     return im
-    
+
 def GetResult(path):
     df = GetPCDDataFrame(path)
 
@@ -79,7 +79,7 @@ def GetResult(path):
     result['name'] = df['name']
     result['result'] = pd.Series(prediction)
     return result
-    
+
 def CopyFiles(df, path_from, path_to):
     categories = ['different person', 'same person']
     for category in categories:
@@ -87,21 +87,22 @@ def CopyFiles(df, path_from, path_to):
         mask = df['result'] == category
         df_selected = df[mask]
         df_selected.reset_index(drop=True,inplace=True)
-        
+
         for idx in range(len(df_selected)):
             old_dir_full = path_from + os.sep + df_selected.loc[idx, 'name']
             new_dir_full = path_to + os.sep + category + os.sep + df.loc[idx, 'name']
             shutil.copytree(old_dir_full, new_dir_full)
-       
+
 def GenerateResultFolder(path_from, path_to):
     df = GetResult(path_from)
     CopyFiles(df, path_from, path_to)
     grouped = df['result'].groupby(df['result'])
     print(grouped.count())
-    
 
 if __name__ == '__main__':
-    # GenerateResultFolder(dir_data01, dir_prediction01)
-    GenerateResultFolder(dir_data02, dir_prediction02)
+    info = 'this file is deprecated, it will be removed from later version'
+    print(info)
+    GenerateResultFolder(dir_data01, dir_prediction01)
+    # GenerateResultFolder(dir_data02, dir_prediction02)
 
     

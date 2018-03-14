@@ -7,8 +7,14 @@ from sklearn.preprocessing import normalize
 from sklearn import metrics
 from vggface import VggFace, preprocess_input
 
-dir_image = 'E:\\DM\\ARFace\\aligned'
-dir_txt = 'E:\\DM\\ARFace\\validation.txt'
+threshold = 0.4
+#dir_image = 'E:\\DM\\ARFace\\aligned'
+#dir_txt = 'E:\\DM\\ARFace\\validation.txt'
+
+dir_image = 'E:\\DM\\VGG-Face\\aligned'
+dir_txt = 'E:\DM\VGG-Face\\validation.txt'
+
+
 model = VggFace()
 
 def GetDataFrame():
@@ -67,7 +73,6 @@ def GetBestThreshold(distance, label):
             threshold = thresholds[idx]
     return threshold, cost
     
-    
 if __name__ == '__main__':
     labels, dists = GetResult()
     labels = (labels=='S').astype(np.int)
@@ -79,5 +84,6 @@ if __name__ == '__main__':
     print('auc is: {}'.format(auc))
     print('threshold is {}'.format(threshold))
     print('accuracy is {}'.format(acc))
+    
 
     

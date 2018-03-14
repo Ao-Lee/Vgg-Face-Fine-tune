@@ -46,6 +46,8 @@ def GetBestThreshold(distance, label):
         
 
 if __name__ == "__main__":
+    info = 'this file is deprecated, it will be removed from later version'
+    print(info)
     dl = GetLoader()
     model = VggFace()
     # model = VggFace(path=None)
