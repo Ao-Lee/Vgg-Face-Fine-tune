@@ -7,7 +7,7 @@ from keras.callbacks import ModelCheckpoint, EarlyStopping
 from sklearn.preprocessing import normalize
 from vggface import VggFace
 import cfg
-from data import LFWReader, TripletGenerator
+from data import LFWReader, ARFaceReader, PCDReader, MixedReader, TripletGenerator
 
 def triplet_loss(inputs, dist='sqeuclidean', margin='maxplus'):
     anchor, positive, negative = inputs
@@ -81,9 +81,13 @@ def GetModel():
     return embedding_model, triplet_model
     
 if __name__=='__main__':
-    reader = LFWReader()
-    gen_tr = TripletGenerator(reader)
-    gen_te = TripletGenerator(reader)
+    reader_PCD = PCDReader(dir_images='E:\\DM\\PCD\\aligned')
+    reader_AR = ARFaceReader(dir_images='E:\\DM\\ARFace\\aligned')
+    reader_LFW = LFWReader(dir_images='E:\\DM\\VGG-Face\\aligned')
+    reader_mix = MixedReader([reader_PCD, reader_AR])
+    
+    gen_tr = TripletGenerator(reader_mix)
+    gen_te = TripletGenerator(reader_LFW)
     embedding_model, triplet_model = GetModel()
     
     for layer in embedding_model.layers[35:]:
@@ -91,18 +95,17 @@ if __name__=='__main__':
     for layer in embedding_model.layers[:35]:
         layer.trainable = False
         
-    triplet_model.compile(loss=None, optimizer=Adam(0.001))
-    
+    triplet_model.compile(loss=None, optimizer=Adam(0.00002))
     history = triplet_model.fit_generator(gen_tr, 
                               validation_data=gen_te,  
-                              epochs=3, 
+                              epochs=5, 
                               verbose=1, 
                               workers=4,
-                              steps_per_epoch=50, 
-                              validation_steps=20)
+                              steps_per_epoch=100, 
+                              validation_steps=50)
     
     
-    
+    '''
     for layer in embedding_model.layers[30:]:
         layer.trainable = True
     for layer in embedding_model.layers[:30]:
@@ -112,12 +115,13 @@ if __name__=='__main__':
     
     history = triplet_model.fit_generator(gen_tr, 
                               validation_data=gen_te,  
-                              epochs=2, 
+                              epochs=1, 
                               verbose=1, 
                               workers=4,
-                              steps_per_epoch=50, 
+                              steps_per_epoch=500, 
                               validation_steps=20)
     
     embedding_model.save_weights(cfg.dir_model_tuned)
+    '''
     
     

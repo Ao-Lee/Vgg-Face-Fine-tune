@@ -6,16 +6,22 @@ from PIL import Image
 from sklearn.preprocessing import normalize
 from sklearn import metrics
 from vggface import VggFace, preprocess_input
+import cfg
 
-threshold = 0.4
-#dir_image = 'E:\\DM\\ARFace\\aligned'
-#dir_txt = 'E:\\DM\\ARFace\\validation.txt'
+threshold = 1.1
+# dir_image = 'E:\\DM\\ARFace\\aligned'
+# dir_txt = 'E:\\DM\\ARFace\\validation.txt'
 
-dir_image = 'E:\\DM\\VGG-Face\\aligned'
-dir_txt = 'E:\DM\VGG-Face\\validation.txt'
+# dir_image = 'E:\\DM\\VGG-Face\\aligned'
+# dir_txt = 'E:\\DM\\VGG-Face\\validation.txt'
+
+dir_image = 'E:\\DM\\PCD\\aligned'
+dir_txt = 'E:\DM\PCD\\validation.txt'
 
 
-model = VggFace()
+# model = VggFace(cfg.dir_model_trim)
+path = 'E:\\DM\\VGG-Face\\model\\vgg-face-keras-fc-tensorflow-tuned-haha.h5'
+model = VggFace(path)
 
 def GetDataFrame():
     return pd.read_table(dir_txt, sep='\t')
@@ -76,7 +82,7 @@ def GetBestThreshold(distance, label):
 if __name__ == '__main__':
     labels, dists = GetResult()
     labels = (labels=='S').astype(np.int)
-    threshold, _ = GetBestThreshold(dists, labels)
+    # threshold, _ = GetBestThreshold(dists, labels)
     predictions = (dists < threshold).astype(np.int)
     
     auc = metrics.roc_auc_score(np.logical_not(labels), dists)
@@ -84,6 +90,3 @@ if __name__ == '__main__':
     print('auc is: {}'.format(auc))
     print('threshold is {}'.format(threshold))
     print('accuracy is {}'.format(acc))
-    
-
-    

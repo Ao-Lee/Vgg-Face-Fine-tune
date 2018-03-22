@@ -19,7 +19,7 @@ def VggFace(path=cfg.dir_model, include_top=False):
     pad2_2 = ZeroPadding2D((1, 1))(conv2_1)
     conv2_2 = Conv2D(128, (3, 3), activation='relu', name='conv2_2')(pad2_2)
     pool2 = MaxPooling2D((2, 2), strides=(2, 2))(conv2_2)
-
+    
     pad3_1 = ZeroPadding2D((1, 1))(pool2)
     conv3_1 = Conv2D(256, (3, 3), activation='relu', name='conv3_1')(pad3_1)
     pad3_2 = ZeroPadding2D((1, 1))(conv3_1)

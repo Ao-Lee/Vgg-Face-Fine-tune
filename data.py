@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 import os
 from os import listdir
-from os.path import join
+from os.path import join, exists
 from PIL import Image
 from vggface import preprocess_input
 import matplotlib.pyplot as plt
@@ -93,10 +93,77 @@ def TestLFWSet():
     print(data['img2'].shape)
     print(label.shape)
     
+class PCDReader(object):
+    def __init__(self, dir_images):
+        self.root = dir_images
+        self.root = 'E:\\DM\\PCD\\aligned'
+        paths = os.listdir(self.root)
+        paths = [join(self.root, path) for path in paths]
+        self.num_class = len(paths)
+        self.num_per_person = [len(os.listdir(path)) for path in paths]
+       
+    @staticmethod
+    def CreateName(root, personID, imageID):
+        p = '%03d'%personID
+        i = '%02d'%imageID + '.jpg'
+        return join(root, p, i)
+        
+    def GetTriplet(self):
+        path_anchor, path_pos, path_neg = '', '', ''
+        idx_person_pos = np.random.randint(low=0, high=self.num_class)
+        L = self.num_per_person
+        
+        while not exists(path_anchor):
+            idx_img_anchor = np.random.randint(low=0, high=L[idx_person_pos])
+            path_anchor = PCDReader.CreateName(self.root, idx_person_pos, idx_img_anchor)
+            
+            
+        idx_img_pos=-1
+        while (not exists(path_pos)) or  idx_img_pos==idx_img_anchor:
+            idx_img_pos = np.random.randint(low=0, high=L[idx_person_pos])
+            path_pos = PCDReader.CreateName(self.root, idx_person_pos, idx_img_pos)
+        
+        idx_person_neg=-1
+        while (not exists(path_neg)) or idx_person_neg==idx_person_pos:
+            idx_person_neg = np.random.randint(low=0, high=self.num_class)
+            idx_img_neg = np.random.randint(low=0, high=L[idx_person_neg])
+            path_neg = PCDReader.CreateName(self.root, idx_person_neg, idx_img_neg)
     
+        return path_anchor, path_pos, path_neg
+        
+class ARFaceReader(object):
+    def __init__(self, dir_images):
+        self.root = dir_images
+ 
+    @staticmethod
+    def CreateName(root, sex, personID, imageID):
+        name = sex + '-' + '%03d'%personID + '-' + '%02d'%imageID
+        name = name + '.bmp'
+        return join(root, name)
+        
+    def GetTriplet(self):
+        path_anchor, path_pos, path_neg = '', '', ''
+        idx_sex = 'M' if np.random.random() > 0.5 else 'W'
+        
+        while not exists(path_anchor):
+            idx_person_pos = np.random.randint(low=1, high=51)
+            path_anchor = ARFaceReader.CreateName(self.root, idx_sex, idx_person_pos, 1)
+            
+        while not exists(path_pos):
+            idx_img_pos = np.random.randint(low=2, high=27)
+            path_pos = ARFaceReader.CreateName(self.root, idx_sex, idx_person_pos, idx_img_pos)
+        
+        idx_person_neg=0
+        while (not exists(path_neg)) or idx_person_neg==idx_person_pos:
+            idx_person_neg = np.random.randint(low=1, high=51)
+            idx_img_neg = np.random.randint(low=1, high=27)
+            path_neg = ARFaceReader.CreateName(self.root, idx_sex, idx_person_neg, idx_img_neg)
+    
+        return path_anchor, path_pos, path_neg
+        
 class LFWReader(object):
-    def __init__(self):
-        self.root = cfg.dir_images
+    def __init__(self, dir_images):
+        self.root = dir_images
         self.list_classes = os.listdir(self.root)
         self.not_single = [c for c in self.list_classes if len(listdir(join(self.root, c)))>1]
         self.list_classes_idx = range(len(self.list_classes))
@@ -137,6 +204,23 @@ class LFWReader(object):
 
         return path_anchor, path_pos, path_neg
 
+'''
+mix a list of readers together
+usage:
+    reader_PCD = PCDReader(dir_images='E:\\DM\\PCD\\aligned')
+    reader_AR = ARFaceReader(dir_images='E:\\DM\\ARFace\\aligned')
+    reader_LFW = LFWReader(dir_images='E:\\DM\\VGG-Face\\aligned')
+    reader = MixedReader([reader_PCD, reader_AR, reader_LFW])
+'''
+class MixedReader(object):
+    def __init__(self, list_readers):
+        self.readers = list_readers
+        
+    def GetTriplet(self):
+        idx = np.random.randint(low=0, high=len(self.readers))
+        path_anchor, path_pos, path_neg = self.readers[idx].GetTriplet()
+        return path_anchor, path_pos, path_neg
+        
 def ReadAndResize(filepath):
     im = Image.open((filepath)).convert('RGB')
     im = im.resize((cfg.image_size, cfg.image_size))
@@ -176,8 +260,8 @@ def ShowImg(img):
     plt.show()
     plt.close()
     
-def TestTripletGenerator():  
-    reader = LFWReader()
+def TestTripletGenerator(reader):  
+    # reader = LFWReader(dir_images='E:\\DM\\VGG-Face\\aligned')
     gen = TripletGenerator(reader)
     data = next(gen)
     imgs_anchor = data[0]['anchor_input']
@@ -200,9 +284,31 @@ def TestTripletGenerator():
         ShowImg(neg)
         break
 
+def TestLFW():
+    reader = LFWReader(dir_images='E:\\DM\\VGG-Face\\aligned')
+    TestTripletGenerator(reader)
+    
+def TestARFace():
+    reader = ARFaceReader(dir_images='E:\\DM\\ARFace\\aligned')
+    TestTripletGenerator(reader)
+    
+def TestPCD():
+    reader = PCDReader(dir_images='E:\\DM\\PCD\\aligned')
+    TestTripletGenerator(reader)
+    
+def TestMix():
+    reader_PCD = PCDReader(dir_images='E:\\DM\\PCD\\aligned')
+    reader_AR = ARFaceReader(dir_images='E:\\DM\\ARFace\\aligned')
+    reader_LFW = LFWReader(dir_images='E:\\DM\\VGG-Face\\aligned')
+    reader = MixedReader([reader_PCD, reader_AR, reader_LFW])
+    print(reader)
+    TestTripletGenerator(reader)
+    
 if __name__=='__main__':
-    # TestLFWSet()
-    TestTripletGenerator()
+    # TestLFW()
+    # TestARFace()
+    # TestPCD()
+    TestMix()
 
     
 
