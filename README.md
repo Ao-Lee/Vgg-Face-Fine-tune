@@ -1,5 +1,5 @@
 
-# [what content does this project contain]
+# what content does this project contain
 1. face detection and alignment
 2. face verification predictions
 3. fine tune a pre-trained model with your customized dataset
