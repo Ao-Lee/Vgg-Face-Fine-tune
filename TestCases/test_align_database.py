@@ -1,4 +1,6 @@
-from align import AlignDatabase, GetAlignFuncByBoundingBox
+import sys
+sys.path.append("..")
+from UtilsAlign import AlignDatabase, GetAlignFuncByBoundingBox
 
 if __name__ == '__main__':
     

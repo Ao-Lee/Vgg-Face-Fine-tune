@@ -5,9 +5,9 @@ from PIL import Image
 from .common import Inputs2ArrayImage, SelectLargest
  
 # convert a path to traing or testing image
-def Convert(input, landmark_func, output_size, ec_y):
+def Convert(inputs, landmark_func, output_size, ec_y):
     F = landmark_func
-    img = Inputs2ArrayImage(input)
+    img = Inputs2ArrayImage(inputs)
     img = Image.fromarray(np.uint8(img))
     landmark = F(img)
     img = _HorizontalEyes(img, landmark)
@@ -18,14 +18,14 @@ def Convert(input, landmark_func, output_size, ec_y):
     return np.asarray(img) # convert to ndarray
     
 def GetAlignFuncByLandmarks(output_size, ec_y):
-    F = _GetLandmarkFunc()
-    return lambda input: Convert(input, F, output_size, ec_y)
+    F = GetLargestLandmark()
+    return lambda inputs: Convert(inputs, F, output_size, ec_y)
 
-def _GetLandmarks(input, pnet, rnet, onet):
+def _GetLargestLandmark_impl(inputs, pnet, rnet, onet):
     minsize = 20 # minimum size of face
     threshold = [ 0.6, 0.7, 0.7 ]  # three steps's threshold
     factor = 0.709 # scale factor
-    img = Inputs2ArrayImage(input)
+    img = Inputs2ArrayImage(inputs)
     img_size = np.asarray(img.shape)[0:2]
     bounding_boxes, landmarks = detect.detect_face(img, minsize, pnet, rnet, onet, threshold, factor)
     num_faces = bounding_boxes.shape[0]
@@ -36,15 +36,27 @@ def _GetLandmarks(input, pnet, rnet, onet):
     landmarks = [point[idx] for point in landmarks]
     return landmarks
     
-    
-def _GetLandmarkFunc():
+def _GetLandmarks_impl(inputs, pnet, rnet, onet):
+    minsize = 20 # minimum size of face
+    threshold = [ 0.6, 0.7, 0.7 ]  # three steps's threshold
+    factor = 0.709 # scale factor
+    img = Inputs2ArrayImage(inputs)
+    bounding_boxes, landmarks = detect.detect_face(img, minsize, pnet, rnet, onet, threshold, factor)
+    return bounding_boxes, landmarks
+     
+def _LandmarkFunc(F):
     with tf.Graph().as_default():
         gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=1.0)
         sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options, log_device_placement=False))
         with sess.as_default():
             pnet, rnet, onet = detect.create_mtcnn(sess, None)
-    return lambda input : _GetLandmarks(input, pnet, rnet, onet)
+    return lambda inputs: F(inputs, pnet, rnet, onet)
     
+def GetLargestLandmark():
+    return _LandmarkFunc(_GetLargestLandmark_impl)
+    
+def GetLandmarks():
+    return _LandmarkFunc(_GetLandmarks_impl)
     
 def _Path2PIL(path):
     with open(path, 'rb') as f:

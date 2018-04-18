@@ -1,15 +1,15 @@
 '''
 frequently used implementations that can be used everywhere :P
 '''
-
 import numpy as np
 from scipy.misc import imresize
-import os
-from PIL import Image
 from sklearn.preprocessing import normalize
 from sklearn import metrics
 from os.path import isfile
+
+import cfg
 from vggface import preprocess_input
+from UtilsAlign import Inputs2ArrayImage
 
 def GetBestThreshold(distance, label):
     def Cost(fpr, tpr):
@@ -27,12 +27,11 @@ def GetBestThreshold(distance, label):
             threshold = thresholds[idx]
     return threshold, cost
     
-    
 def Verify(path1, path2, model):
     assert(isfile(path1))
     assert(isfile(path2))
-    img1 = _Path2Image(path1)
-    img2 = _Path2Image(path2)
+    img1 = Inputs2ArrayImage(path1, dtype=np.float32, size=cfg.image_size)
+    img2 = Inputs2ArrayImage(path2, dtype=np.float32, size=cfg.image_size)
     img1 = np.expand_dims(img1, axis=0)
     img2 = np.expand_dims(img2, axis=0)
     pair = np.concatenate([img1,img2], axis=0)
@@ -40,48 +39,14 @@ def Verify(path1, path2, model):
     embeddings = model.predict_on_batch(pair)
     dist = _DistanceEuclidean(embeddings[0], embeddings[1])
     return dist
-    
-def _Path2Image(path):
-    im = Image.open(path)
-    im = im.resize((224,224))
-    im = np.array(im).astype(np.float32)
-    return im
-    
+        
 def _DistanceEuclidean(X, Y):
     X = X.reshape(1, -1)
     Y = Y.reshape(1, -1)
     diff = (normalize(X) - normalize(Y))
     return (diff**2).sum()
     
-    
-def Inputs2ArrayImage(inputs):
-    #convert image path or PIL Image to ndarray Image if needed
-    img = None
-    if isinstance(inputs, str): # input is a path
-        img = Image.open(os.path.expanduser(inputs))
-        img = np.array(img)
-        # img = misc.imread(os.path.expanduser(input))
-    elif isinstance(inputs, Image.Image): # input is a PIL image
-        img = np.array(inputs)
-    elif isinstance(inputs, (np.ndarray, np.generic)): # input is a numpy array
-        img = inputs.astype('uint8')
-    else:
-        msg = 'unexpected type of input! '
-        msg += 'expect str, PIL or ndarray image, '
-        msg += 'but got {}'
-        raise TypeError(msg.format(type(inputs)))
-        
-    if len(img.shape)==2:
-        img = _Gray2RGB(img)
-        
-    return img
 
-def _Gray2RGB(img):
-    assert len(img.shape)==2
-    A = np.expand_dims(img, axis=-1)
-    B = np.expand_dims(img, axis=-1)
-    C = np.expand_dims(img, axis=-1)
-    return np.concatenate([A,B,C],axis=-1)
     
 # if u got two imgs with same size, and u wanna show them together in one shot, here is what u got
 def MergeImage(img1, img2, how='auto', color=(40,40,40), margin='auto', min_size=600):

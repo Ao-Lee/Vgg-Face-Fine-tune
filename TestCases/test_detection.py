@@ -1,4 +1,3 @@
-import tensorflow as tf
 import numpy as np
 from PIL import Image, ImageDraw
 from scipy.misc import imsave
@@ -6,26 +5,10 @@ from os.path import join, isfile
 
 import sys
 sys.path.append("..")
-from AlignDataBase.align.base import detect
 from utils import Inputs2ArrayImage, MergeImage
+from UtilsAlign import GetLandmarks
 
-def _GetLandmarks(inputs, pnet, rnet, onet):
-    minsize = 20 # minimum size of face
-    threshold = [ 0.6, 0.7, 0.7 ]  # three steps's threshold
-    factor = 0.709 # scale factor
-    img = Inputs2ArrayImage(inputs)
-    bounding_boxes, landmarks = detect.detect_face(img, minsize, pnet, rnet, onet, threshold, factor)
-    return bounding_boxes, landmarks
-    
-def _GetLandmarkFunc():
-    with tf.Graph().as_default():
-        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=1.0)
-        sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options, log_device_placement=False))
-        with sess.as_default():
-            pnet, rnet, onet = detect.create_mtcnn(sess, None)
-    return lambda input : _GetLandmarks(input, pnet, rnet, onet)
-    
-F = _GetLandmarkFunc()
+F = GetLandmarks()
 
 def DrawPoint(draw, x, y):
     r = 1
