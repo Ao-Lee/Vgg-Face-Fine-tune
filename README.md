@@ -1,7 +1,11 @@
 
 # what content does this project contain
 1. face detection and alignment
+![Alt text](https://github.com/Ao-Lee/Vgg-Face-Fine-tune/raw/master/TestCases/imgs/detection/_01.jpg)
+
 2. face verification predictions
+![Alt text](https://github.com/Ao-Lee/Vgg-Face-Fine-tune/raw/master/TestCases/imgs/verification/example.png)
+
 3. fine tune a pre-trained model with your customized dataset
 
 # how it works
