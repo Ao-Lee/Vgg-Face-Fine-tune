@@ -1,0 +1,1 @@
+python script of generating this validation.txt file is lost :(

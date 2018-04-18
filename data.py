@@ -96,7 +96,6 @@ def TestLFWSet():
 class PCDReader(object):
     def __init__(self, dir_images):
         self.root = dir_images
-        self.root = 'E:\\DM\\PCD\\aligned'
         paths = os.listdir(self.root)
         paths = [join(self.root, path) for path in paths]
         self.num_class = len(paths)
@@ -261,7 +260,6 @@ def ShowImg(img):
     plt.close()
     
 def TestTripletGenerator(reader):  
-    # reader = LFWReader(dir_images='E:\\DM\\VGG-Face\\aligned')
     gen = TripletGenerator(reader)
     data = next(gen)
     imgs_anchor = data[0]['anchor_input']
@@ -285,21 +283,21 @@ def TestTripletGenerator(reader):
         break
 
 def TestLFW():
-    reader = LFWReader(dir_images='E:\\DM\\VGG-Face\\aligned')
+    reader = LFWReader(dir_images='E:\\DM\\Faces\\Data\\LFW\\aligned')
     TestTripletGenerator(reader)
     
 def TestARFace():
-    reader = ARFaceReader(dir_images='E:\\DM\\ARFace\\aligned')
+    reader = ARFaceReader(dir_images='E:\\DM\\Faces\\Data\\ARFace\\aligned')
     TestTripletGenerator(reader)
     
 def TestPCD():
-    reader = PCDReader(dir_images='E:\\DM\\PCD\\aligned')
+    reader = PCDReader(dir_images='E:\\DM\\Faces\\Data\\PCD\\aligned')
     TestTripletGenerator(reader)
     
 def TestMix():
-    reader_PCD = PCDReader(dir_images='E:\\DM\\PCD\\aligned')
-    reader_AR = ARFaceReader(dir_images='E:\\DM\\ARFace\\aligned')
-    reader_LFW = LFWReader(dir_images='E:\\DM\\VGG-Face\\aligned')
+    reader_PCD = PCDReader(dir_images='E:\\DM\\Faces\\Data\\PCD\\aligned')
+    reader_AR = ARFaceReader(dir_images='E:\\DM\\Faces\\Data\\ARFace\\aligned')
+    reader_LFW = LFWReader(dir_images='E:\\DM\\Faces\\Data\\LFW\\aligned')
     reader = MixedReader([reader_PCD, reader_AR, reader_LFW])
     print(reader)
     TestTripletGenerator(reader)

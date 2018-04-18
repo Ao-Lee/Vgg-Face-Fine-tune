@@ -5,7 +5,7 @@ from keras import backend as K
 import cfg
 assert cfg.image_size==224
 
-def VggFace(path=cfg.dir_model, include_top=False):
+def VggFace(path=cfg.dir_model, is_origin=False):
     img = Input(shape=(3, 224, 224))
 
     pad1_1 = ZeroPadding2D(padding=(1, 1))(img)
@@ -49,22 +49,21 @@ def VggFace(path=cfg.dir_model, include_top=False):
     fc6_drop = Dropout(0.5)(fc6)
     fc7 = Dense(4096, activation=None, name='fc7')(fc6_drop)
     
+    norm = Lambda(lambda x: K.l2_normalize(x, axis=1))(fc7)
     
     fc7_activation = Activation('relu')(fc7)
     fc7_drop = Dropout(0.5)(fc7_activation)
     out = Dense(2622, activation='softmax', name='fc8')(fc7_drop)
 
-    model = Model(inputs=img, outputs=out)
-
-    if path is not None:
+    if is_origin:
+        model = Model(inputs=img, outputs=out)
         model.load_weights(path)
+        return Model(inputs=model.input, outputs=norm)
 
-    if include_top==True:
-        return model
     else:
-        norm = Lambda(lambda x: K.l2_normalize(x, axis=1))(fc7)
-        topless = Model(inputs=model.input, outputs=norm)
-        return topless
+        model = Model(inputs=img, outputs=norm)
+        model.load_weights(path)
+        return model
         
 def preprocess_input(batch_image):
     if not isinstance(batch_image, (np.ndarray, np.generic)):

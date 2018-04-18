@@ -3,7 +3,7 @@ from keras import backend as K
 from keras.models import Model
 from keras.optimizers import Adam
 from keras.layers import Input
-from keras.callbacks import ModelCheckpoint, EarlyStopping
+# from keras.callbacks import ModelCheckpoint, EarlyStopping
 from sklearn.preprocessing import normalize
 from vggface import VggFace
 import cfg
@@ -64,7 +64,7 @@ def check_loss():
 
     
 def GetModel():
-    embedding_model = VggFace()
+    embedding_model = VggFace(is_origin=True)
     input_shape = (3, cfg.image_size, cfg.image_size)
     anchor_input = Input(input_shape, name='anchor_input')
     positive_input = Input(input_shape, name='positive_input')
@@ -81,12 +81,12 @@ def GetModel():
     return embedding_model, triplet_model
     
 if __name__=='__main__':
-    reader_PCD = PCDReader(dir_images='E:\\DM\\PCD\\aligned')
-    reader_AR = ARFaceReader(dir_images='E:\\DM\\ARFace\\aligned')
-    reader_LFW = LFWReader(dir_images='E:\\DM\\VGG-Face\\aligned')
+    reader_PCD = PCDReader(dir_images='E:\\DM\\Faces\\Data\\PCD\\aligned')
+    reader_AR = ARFaceReader(dir_images='E:\\DM\\Faces\\Data\\ARFace\\aligned')
+    reader_LFW = LFWReader(dir_images='E:\\DM\\Faces\\Data\\LFW\\aligned')
     reader_mix = MixedReader([reader_PCD, reader_AR])
     
-    gen_tr = TripletGenerator(reader_mix)
+    gen_tr = TripletGenerator(reader_LFW)
     gen_te = TripletGenerator(reader_LFW)
     embedding_model, triplet_model = GetModel()
     

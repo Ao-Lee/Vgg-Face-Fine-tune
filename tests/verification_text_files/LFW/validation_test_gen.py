@@ -13,8 +13,8 @@ Candice_Bergen\Candice_Bergen_0013.jpg  Prospero_Pichay\Prospero_Pichay_0014.jpg
 import pandas as pd
 from os.path import join
 
-path_from = 'E:\\DM\\VGG-Face\\pairsDevTest.txt'
-path_to = 'E:\\DM\\VGG-Face\\validation.txt'
+path_from = 'pairsDevTest.txt'
+path_to = 'validation.txt'
 
 def CreateFilename(name, idx):
     idx = int(idx)

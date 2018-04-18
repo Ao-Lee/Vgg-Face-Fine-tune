@@ -1,7 +1,6 @@
-import os
 import numpy as np
-from scipy import misc
 from sklearn.metrics import pairwise as kernels
+import os
 from PIL import Image
 
 STRATEGY_ALL = 0
@@ -45,7 +44,9 @@ def Inputs2ArrayImage(input):
     #convert image path or PIL Image to ndarray Image if needed
     img = None
     if isinstance(input,str): # input is a path
-        img = misc.imread(os.path.expanduser(input))
+        img = Image.open(os.path.expanduser(input))
+        img = np.array(img)
+        # img = misc.imread(os.path.expanduser(input))
     elif isinstance(input, Image.Image): # input is a PIL image
         img = np.array(input)
     elif isinstance(input, (np.ndarray, np.generic)): # input is a numpy array
@@ -55,6 +56,18 @@ def Inputs2ArrayImage(input):
         msg += 'expect str, PIL or ndarray image, '
         msg += 'but got {}'
         raise TypeError(msg.format(type(input)))
+        
+    if len(img.shape)==2:
+        img = _Gray2RGB(img)
+        
     return img
+
+def _Gray2RGB(img):
+    assert len(img.shape)==2
+    A = np.expand_dims(img, axis=-1)
+    B = np.expand_dims(img, axis=-1)
+    C = np.expand_dims(img, axis=-1)
+    return np.concatenate([A,B,C],axis=-1)
+
     
     
