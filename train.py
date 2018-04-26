@@ -7,7 +7,8 @@ from keras.layers import Input
 from sklearn.preprocessing import normalize
 from vggface import VggFace
 import cfg
-from data import LFWReader, ARFaceReader, PCDReader, MixedReader, TripletGenerator
+from data import LFWReader, ARFaceReader, PCDReader, MixedReader, PEALReader
+from data import TripletGenerator
 
 def triplet_loss(inputs, dist='sqeuclidean', margin='maxplus'):
     anchor, positive, negative = inputs
@@ -81,18 +82,27 @@ def GetModel():
     return embedding_model, triplet_model
     
 if __name__=='__main__':
-    reader_PCD = PCDReader(dir_images='E:\\DM\\Faces\\Data\\PCD\\aligned')
-    reader_AR = ARFaceReader(dir_images='E:\\DM\\Faces\\Data\\ARFace\\aligned')
-    reader_LFW = LFWReader(dir_images='E:\\DM\\Faces\\Data\\LFW\\aligned')
-    reader_mix = MixedReader([reader_PCD, reader_AR])
     
-    gen_tr = TripletGenerator(reader_LFW)
-    gen_te = TripletGenerator(reader_LFW)
+    reader_PCD = PCDReader(dir_images=cfg.path_PCD)
+    reader_AR = ARFaceReader(dir_images=cfg.path_AR)
+    reader_LFW = LFWReader(dir_images=cfg.path_LFW)
+    reader_Pose = PEALReader(dir_images=cfg.path_Pose)
+    reader_Accessory = PEALReader(dir_images=cfg.path_Accessory)
+    reader = MixedReader([reader_PCD, reader_AR, reader_LFW, reader_Pose, reader_Accessory])
+    
+    reader_tr = MixedReader([reader_LFW, reader_Pose, reader_Accessory])
+    reader_te = MixedReader([reader_PCD, reader_AR])
+
+    gen_tr = TripletGenerator(reader_tr)
+    gen_te = TripletGenerator(reader_te)
     embedding_model, triplet_model = GetModel()
     
-    for layer in embedding_model.layers[35:]:
+    
+    
+    
+    for layer in embedding_model.layers[-2:]:
         layer.trainable = True
-    for layer in embedding_model.layers[:35]:
+    for layer in embedding_model.layers[:-2]:
         layer.trainable = False
         
     triplet_model.compile(loss=None, optimizer=Adam(0.00002))
@@ -105,7 +115,7 @@ if __name__=='__main__':
                               validation_steps=50)
     
     
-    '''
+    
     for layer in embedding_model.layers[30:]:
         layer.trainable = True
     for layer in embedding_model.layers[:30]:

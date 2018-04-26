@@ -3,7 +3,7 @@ from os.path import join, isfile
 import pandas as pd
 from tqdm import tqdm
 from sklearn import metrics
-
+from keras import backend as K
 import sys
 sys.path.append('..')
 from vggface import VggFace
@@ -18,6 +18,8 @@ import cfg
 
 dir_image = 'E:\\DM\\Faces\\Data\\PCD\\aligned'
 dir_txt = 'verification_text_files\\PCD\\validation.txt'
+K.set_image_dim_ordering('th')
+
 
 def GetDataFrame():
     return pd.read_table(dir_txt, sep='\t')
